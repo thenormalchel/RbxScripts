@@ -8,6 +8,7 @@ if _G.CanOpenCD == 'Y' or _G.CanOpenCD == nil then
 	local UICorner_2 = Instance.new("UICorner")
 	local close = Instance.new("TextButton")
 	local UICorner_3 = Instance.new("UICorner")
+	print("Hello, MityHub")
 
 	ScreenGui.Parent = game.CoreGui
 	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
