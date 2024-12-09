@@ -53,8 +53,7 @@ Section:NewToggle("Chams", "Toggle - Chams", function(state)
 end)
 
 -- Бинд на клавиши
-Section:NewKeybind("KeybindText", "KeybindInfo", Enum.KeyCode.F, function()
-	print("You just clicked the bind")
+Section:NewKeybind("Fly key bind", "Press Key To Fly!", Enum.KeyCode.F, function()
 end)
 
 -- Дропдаун
@@ -72,18 +71,288 @@ local Section = Tab:NewSection("Fling")
 -- Кнопка
 Section:NewButton("Fling All", "Fling All :D", function()
     print("By mitqydev")
+        local Targets = {"All"} -- "All", "Target Name", "arian_was_here"
+
+    local Players = game:GetService("Players")
+    local Player = Players.LocalPlayer
+
+    local AllBool = false
+
+    local GetPlayer = function(Name)
+        Name = Name:lower()
+        if Name == "all" or Name == "others" then
+            AllBool = true
+            return
+        elseif Name == "random" then
+            local GetPlayers = Players:GetPlayers()
+            if table.find(GetPlayers,Player) then table.remove(GetPlayers,table.find(GetPlayers,Player)) end
+            return GetPlayers[math.random(#GetPlayers)]
+        elseif Name ~= "random" and Name ~= "all" and Name ~= "others" then
+            for _,x in next, Players:GetPlayers() do
+                if x ~= Player then
+                    if x.Name:lower():match("^"..Name) then
+                        return x;
+                    elseif x.DisplayName:lower():match("^"..Name) then
+                        return x;
+                    end
+                end
+            end
+        else
+            return
+        end
+    end
+
+    local Message = function(_Title, _Text, Time)
+        game:GetService("StarterGui"):SetCore("SendNotification", {Title = _Title, Text = _Text, Duration = Time})
+    end
+
+    local SkidFling = function(TargetPlayer)
+        local Character = Player.Character
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+        local RootPart = Humanoid and Humanoid.RootPart
+
+        local TCharacter = TargetPlayer.Character
+        local THumanoid
+        local TRootPart
+        local THead
+        local Accessory
+        local Handle
+
+        if TCharacter:FindFirstChildOfClass("Humanoid") then
+            THumanoid = TCharacter:FindFirstChildOfClass("Humanoid")
+        end
+        if THumanoid and THumanoid.RootPart then
+            TRootPart = THumanoid.RootPart
+        end
+        if TCharacter:FindFirstChild("Head") then
+            THead = TCharacter.Head
+        end
+        if TCharacter:FindFirstChildOfClass("Accessory") then
+            Accessory = TCharacter:FindFirstChildOfClass("Accessory")
+        end
+        if Accessoy and Accessory:FindFirstChild("Handle") then
+            Handle = Accessory.Handle
+        end
+
+        if Character and Humanoid and RootPart then
+            if RootPart.Velocity.Magnitude < 50 then
+                getgenv().OldPos = RootPart.CFrame
+            end
+            if THumanoid and THumanoid.Sit and not AllBool then
+                return Message("Error Occurred", "Targeting is sitting", 5) -- u can remove dis part if u want lol
+            end
+            if THead then
+                workspace.CurrentCamera.CameraSubject = THead
+            elseif not THead and Handle then
+                workspace.CurrentCamera.CameraSubject = Handle
+            elseif THumanoid and TRootPart then
+                workspace.CurrentCamera.CameraSubject = THumanoid
+            end
+            if not TCharacter:FindFirstChildWhichIsA("BasePart") then
+                return
+            end
+            
+            local FPos = function(BasePart, Pos, Ang)
+                RootPart.CFrame = CFrame.new(BasePart.Position) * Pos * Ang
+                Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position) * Pos * Ang)
+                RootPart.Velocity = Vector3.new(9e7, 9e7 * 10, 9e7)
+                RootPart.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
+            end
+            
+            local SFBasePart = function(BasePart)
+                local TimeToWait = 2
+                local Time = tick()
+                local Angle = 0
+
+                repeat
+                    if RootPart and THumanoid then
+                        if BasePart.Velocity.Magnitude < 50 then
+                            Angle = Angle + 100
+
+                            FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle),0 ,0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(2.25, 1.5, -2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(-2.25, -1.5, 2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection,CFrame.Angles(math.rad(Angle), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection,CFrame.Angles(math.rad(Angle), 0, 0))
+                            task.wait()
+                        else
+                            FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, -THumanoid.WalkSpeed), CFrame.Angles(0, 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0))
+                            task.wait()
+                            
+                            FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, -TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(0, 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(90), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5 ,0), CFrame.Angles(math.rad(-90), 0, 0))
+                            task.wait()
+
+                            FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0))
+                            task.wait()
+                        end
+                    else
+                        break
+                    end
+                until BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= TargetPlayer.Character or TargetPlayer.Parent ~= Players or not TargetPlayer.Character == TCharacter or THumanoid.Sit or Humanoid.Health <= 0 or tick() > Time + TimeToWait
+            end
+            
+            workspace.FallenPartsDestroyHeight = 0/0
+            
+            local BV = Instance.new("BodyVelocity")
+            BV.Name = "EpixVel"
+            BV.Parent = RootPart
+            BV.Velocity = Vector3.new(9e8, 9e8, 9e8)
+            BV.MaxForce = Vector3.new(1/0, 1/0, 1/0)
+            
+            Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+            
+            if TRootPart and THead then
+                if (TRootPart.CFrame.p - THead.CFrame.p).Magnitude > 5 then
+                    SFBasePart(THead)
+                else
+                    SFBasePart(TRootPart)
+                end
+            elseif TRootPart and not THead then
+                SFBasePart(TRootPart)
+            elseif not TRootPart and THead then
+                SFBasePart(THead)
+            elseif not TRootPart and not THead and Accessory and Handle then
+                SFBasePart(Handle)
+            else
+                return Message("Error Occurred", "Target is missing everything", 5)
+            end
+            
+            BV:Destroy()
+            Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+            workspace.CurrentCamera.CameraSubject = Humanoid
+            
+            repeat
+                RootPart.CFrame = getgenv().OldPos * CFrame.new(0, .5, 0)
+                Character:SetPrimaryPartCFrame(getgenv().OldPos * CFrame.new(0, .5, 0))
+                Humanoid:ChangeState("GettingUp")
+                table.foreach(Character:GetChildren(), function(_, x)
+                    if x:IsA("BasePart") then
+                        x.Velocity, x.RotVelocity = Vector3.new(), Vector3.new()
+                    end
+                end)
+                task.wait()
+            until (RootPart.Position - getgenv().OldPos.p).Magnitude < 25
+            workspace.FallenPartsDestroyHeight = getgenv().FPDH
+        else
+            return Message("Error Occurred", "Random error", 5)
+        end
+    end
+
+    if not Welcome then Message("Script by mitqydev", "T.me/mitqydev", 5) end
+    getgenv().Welcome = true
+    if Targets[1] then for _,x in next, Targets do GetPlayer(x) end else return end
+
+    if AllBool then
+        for _,x in next, Players:GetPlayers() do
+            SkidFling(x)
+        end
+    end
+
+    for _,x in next, Targets do
+        if GetPlayer(x) and GetPlayer(x) ~= Player then
+            if GetPlayer(x).UserId ~= 1414978355 then
+                local TPlayer = GetPlayer(x)
+                if TPlayer then
+                    SkidFling(TPlayer)
+                end
+            else
+                Message("Error Occurred", "This user is whitelisted! (Owner)", 5)
+            end
+        elseif not GetPlayer(x) and not AllBool then
+            Message("Error Occurred", "Username Invalid", 5)
+        end
+    end
+
 end)
 
 -- Текст Бокс
 Section:NewTextBox("Fling Player", "Write username player in text box!", function(txt)
-	print(txt)
+        -- Settings
+    local Settings = {
+    Target = txt -- Target Name (Not display name)
+    }
+
+    -- Objects
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+
+    local LocalPlayer = Players.LocalPlayer
+    local Target = Players:FindFirstChild(Settings.Target)
+
+    local BodyAngularVelocity = Instance.new("BodyAngularVelocity")
+    BodyAngularVelocity.AngularVelocity = Vector3.new(10^6, 10^6, 10^6)
+    BodyAngularVelocity.MaxTorque = Vector3.new(10^6, 10^6, 10^6)
+    BodyAngularVelocity.P = 10^6
+
+    -- Start
+    if not Target then return end
+    BodyAngularVelocity.Parent = LocalPlayer.Character.HumanoidRootPart
+
+    while Target.Character.HumanoidRootPart and LocalPlayer.Character.HumanoidRootPart do
+    RunService.RenderStepped:Wait()
+    LocalPlayer.Character.HumanoidRootPart.CFrame = Target.Character.HumanoidRootPart.CFrame * LocalPlayer.Character.HumanoidRootPart.CFrame.Rotation
+    LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new()
+    end
+    
+    BodyAngularVelocity.Parent = nil
 end)
 
 local Section = Tab:NewSection("Chat💬")
 
 -- Текст Бокс
 Section:NewTextBox("Spam chat💬", "Write message for spam!", function(txt)
-	print(txt)
+        -- Серверный скрипт, который будет отправлять сообщения всем игрокам в чате
+    local Players = game:GetService("Players")
+    local ChatService = game:GetService("Chat")
+
+    local message = txt -- Замените это на ваше сообщение
+    local spamInterval = 0.1 -- Интервал между сообщениями в секундах
+
+    -- Функция для спама в чате
+    local function spamChat()
+        while true do
+            for _, player in ipairs(Players:GetPlayers()) do
+                ChatService:Chat(player.Character.Head, message, Enum.ChatColor.Blue) -- Цвет сообщения можно изменить
+            end
+            wait(spamInterval)
+        end
+    end
+
+    -- Запускаем спам
+    spamChat()
+
 end)
 
 -- Кнопка
@@ -101,14 +370,493 @@ Section:NewSlider("SpeedHack", "Change you'r speed", 500, 0, function(s) -- 500 
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
 end)
 
+-- Кнопка
+Section:NewButton("Fly Gui✈️", "Bird, lol.✈️✈️✈️", function()
+    print("By mitqydev")
+        local main = Instance.new("ScreenGui")
+    local Frame = Instance.new("Frame")
+    local up = Instance.new("TextButton")
+    local down = Instance.new("TextButton")
+    local onof = Instance.new("TextButton")
+    local TextLabel = Instance.new("TextLabel")
+    local plus = Instance.new("TextButton")
+    local speed = Instance.new("TextLabel")
+    local mine = Instance.new("TextButton")
+    local closebutton = Instance.new("TextButton")
+    local mini = Instance.new("TextButton")
+    local mini2 = Instance.new("TextButton")
+
+    main.Name = "main"
+    main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    main.ResetOnSpawn = false
+
+    Frame.Parent = main
+    Frame.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
+    Frame.BorderColor3 = Color3.fromRGB(103, 221, 213)
+    Frame.Position = UDim2.new(0.100320168, 0, 0.379746825, 0)
+    Frame.Size = UDim2.new(0, 190, 0, 57)
+
+    up.Name = "up"
+    up.Parent = Frame
+    up.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
+    up.Size = UDim2.new(0, 44, 0, 28)
+    up.Font = Enum.Font.SourceSans
+    up.Text = "UP"
+    up.TextColor3 = Color3.fromRGB(0, 0, 0)
+    up.TextSize = 14.000
+
+    down.Name = "down"
+    down.Parent = Frame
+    down.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
+    down.Position = UDim2.new(0, 0, 0.491228074, 0)
+    down.Size = UDim2.new(0, 44, 0, 28)
+    down.Font = Enum.Font.SourceSans
+    down.Text = "DOWN"
+    down.TextColor3 = Color3.fromRGB(0, 0, 0)
+    down.TextSize = 14.000
+
+    onof.Name = "onof"
+    onof.Parent = Frame
+    onof.BackgroundColor3 = Color3.fromRGB(255, 249, 74)
+    onof.Position = UDim2.new(0.702823281, 0, 0.491228074, 0)
+    onof.Size = UDim2.new(0, 56, 0, 28)
+    onof.Font = Enum.Font.SourceSans
+    onof.Text = "fly"
+    onof.TextColor3 = Color3.fromRGB(0, 0, 0)
+    onof.TextSize = 14.000
+
+    TextLabel.Parent = Frame
+    TextLabel.BackgroundColor3 = Color3.fromRGB(242, 60, 255)
+    TextLabel.Position = UDim2.new(0.469327301, 0, 0, 0)
+    TextLabel.Size = UDim2.new(0, 100, 0, 28)
+    TextLabel.Font = Enum.Font.SourceSans
+    TextLabel.Text = "Fly - T.me/mitqydev"
+    TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+    TextLabel.TextScaled = true
+    TextLabel.TextSize = 14.000
+    TextLabel.TextWrapped = true
+
+    plus.Name = "plus"
+    plus.Parent = Frame
+    plus.BackgroundColor3 = Color3.fromRGB(133, 145, 255)
+    plus.Position = UDim2.new(0.231578946, 0, 0, 0)
+    plus.Size = UDim2.new(0, 45, 0, 28)
+    plus.Font = Enum.Font.SourceSans
+    plus.Text = "+"
+    plus.TextColor3 = Color3.fromRGB(0, 0, 0)
+    plus.TextScaled = true
+    plus.TextSize = 14.000
+    plus.TextWrapped = true
+
+    speed.Name = "speed"
+    speed.Parent = Frame
+    speed.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
+    speed.Position = UDim2.new(0.468421042, 0, 0.491228074, 0)
+    speed.Size = UDim2.new(0, 44, 0, 28)
+    speed.Font = Enum.Font.SourceSans
+    speed.Text = "1"
+    speed.TextColor3 = Color3.fromRGB(0, 0, 0)
+    speed.TextScaled = true
+    speed.TextSize = 14.000
+    speed.TextWrapped = true
+
+    mine.Name = "mine"
+    mine.Parent = Frame
+    mine.BackgroundColor3 = Color3.fromRGB(123, 255, 247)
+    mine.Position = UDim2.new(0.231578946, 0, 0.491228074, 0)
+    mine.Size = UDim2.new(0, 45, 0, 29)
+    mine.Font = Enum.Font.SourceSans
+    mine.Text = "-"
+    mine.TextColor3 = Color3.fromRGB(0, 0, 0)
+    mine.TextScaled = true
+    mine.TextSize = 14.000
+    mine.TextWrapped = true
+
+    closebutton.Name = "Close"
+    closebutton.Parent = main.Frame
+    closebutton.BackgroundColor3 = Color3.fromRGB(225, 25, 0)
+    closebutton.Font = "SourceSans"
+    closebutton.Size = UDim2.new(0, 45, 0, 28)
+    closebutton.Text = "X"
+    closebutton.TextSize = 30
+    closebutton.Position =  UDim2.new(0, 0, -1, 27)
+
+    mini.Name = "minimize"
+    mini.Parent = main.Frame
+    mini.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
+    mini.Font = "SourceSans"
+    mini.Size = UDim2.new(0, 45, 0, 28)
+    mini.Text = "-"
+    mini.TextSize = 40
+    mini.Position = UDim2.new(0, 44, -1, 27)
+
+    mini2.Name = "minimize2"
+    mini2.Parent = main.Frame
+    mini2.BackgroundColor3 = Color3.fromRGB(192, 150, 230)
+    mini2.Font = "SourceSans"
+    mini2.Size = UDim2.new(0, 45, 0, 28)
+    mini2.Text = "+"
+    mini2.TextSize = 40
+    mini2.Position = UDim2.new(0, 44, -1, 57)
+    mini2.Visible = false
+
+    speeds = 1
+
+    local speaker = game:GetService("Players").LocalPlayer
+
+    local chr = game.Players.LocalPlayer.Character
+    local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+
+    nowe = false
+
+    game:GetService("StarterGui"):SetCore("SendNotification", { 
+        Title = "Fly Gui";
+        Text = "T.me/mitqydev";
+        Icon = "rbxthumb://type=Asset&id=5107182114&w=150&h=150"})
+    Duration = 5;
+
+    Frame.Active = true -- main = gui
+    Frame.Draggable = true
+
+    onof.MouseButton1Down:connect(function()
+
+        if nowe == true then
+            nowe = false
+
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,true)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,true)
+            speaker.Character.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+        else 
+            nowe = true
+
+
+
+            for i = 1, speeds do
+                spawn(function()
+
+                    local hb = game:GetService("RunService").Heartbeat	
+
+
+                    tpwalking = true
+                    local chr = game.Players.LocalPlayer.Character
+                    local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+                    while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+                        if hum.MoveDirection.Magnitude > 0 then
+                            chr:TranslateBy(hum.MoveDirection)
+                        end
+                    end
+
+                end)
+            end
+            game.Players.LocalPlayer.Character.Animate.Disabled = true
+            local Char = game.Players.LocalPlayer.Character
+            local Hum = Char:FindFirstChildOfClass("Humanoid") or Char:FindFirstChildOfClass("AnimationController")
+
+            for i,v in next, Hum:GetPlayingAnimationTracks() do
+                v:AdjustSpeed(0)
+            end
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,false)
+            speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,false)
+            speaker.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+        end
+
+
+
+
+        if game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid").RigType == Enum.HumanoidRigType.R6 then
+
+
+
+            local plr = game.Players.LocalPlayer
+            local torso = plr.Character.Torso
+            local flying = true
+            local deb = true
+            local ctrl = {f = 0, b = 0, l = 0, r = 0}
+            local lastctrl = {f = 0, b = 0, l = 0, r = 0}
+            local maxspeed = 50
+            local speed = 0
+
+
+            local bg = Instance.new("BodyGyro", torso)
+            bg.P = 9e4
+            bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bg.cframe = torso.CFrame
+            local bv = Instance.new("BodyVelocity", torso)
+            bv.velocity = Vector3.new(0,0.1,0)
+            bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+            if nowe == true then
+                plr.Character.Humanoid.PlatformStand = true
+            end
+            while nowe == true or game:GetService("Players").LocalPlayer.Character.Humanoid.Health == 0 do
+                game:GetService("RunService").RenderStepped:Wait()
+
+                if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
+                    speed = speed+.5+(speed/maxspeed)
+                    if speed > maxspeed then
+                        speed = maxspeed
+                    end
+                elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and speed ~= 0 then
+                    speed = speed-1
+                    if speed < 0 then
+                        speed = 0
+                    end
+                end
+                if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
+                    bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f+ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+                    lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
+                elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and speed ~= 0 then
+                    bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f+lastctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+                else
+                    bv.velocity = Vector3.new(0,0,0)
+                end
+                --	game.Players.LocalPlayer.Character.Animate.Disabled = true
+                bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/maxspeed),0,0)
+            end
+            ctrl = {f = 0, b = 0, l = 0, r = 0}
+            lastctrl = {f = 0, b = 0, l = 0, r = 0}
+            speed = 0
+            bg:Destroy()
+            bv:Destroy()
+            plr.Character.Humanoid.PlatformStand = false
+            game.Players.LocalPlayer.Character.Animate.Disabled = false
+            tpwalking = false
+
+
+
+
+        else
+            local plr = game.Players.LocalPlayer
+            local UpperTorso = plr.Character.UpperTorso
+            local flying = true
+            local deb = true
+            local ctrl = {f = 0, b = 0, l = 0, r = 0}
+            local lastctrl = {f = 0, b = 0, l = 0, r = 0}
+            local maxspeed = 50
+            local speed = 0
+
+
+            local bg = Instance.new("BodyGyro", UpperTorso)
+            bg.P = 9e4
+            bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bg.cframe = UpperTorso.CFrame
+            local bv = Instance.new("BodyVelocity", UpperTorso)
+            bv.velocity = Vector3.new(0,0.1,0)
+            bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+            if nowe == true then
+                plr.Character.Humanoid.PlatformStand = true
+            end
+            while nowe == true or game:GetService("Players").LocalPlayer.Character.Humanoid.Health == 0 do
+                wait()
+
+                if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
+                    speed = speed+.5+(speed/maxspeed)
+                    if speed > maxspeed then
+                        speed = maxspeed
+                    end
+                elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and speed ~= 0 then
+                    speed = speed-1
+                    if speed < 0 then
+                        speed = 0
+                    end
+                end
+                if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
+                    bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f+ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+                    lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
+                elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and speed ~= 0 then
+                    bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f+lastctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
+                else
+                    bv.velocity = Vector3.new(0,0,0)
+                end
+
+                bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/maxspeed),0,0)
+            end
+            ctrl = {f = 0, b = 0, l = 0, r = 0}
+            lastctrl = {f = 0, b = 0, l = 0, r = 0}
+            speed = 0
+            bg:Destroy()
+            bv:Destroy()
+            plr.Character.Humanoid.PlatformStand = false
+            game.Players.LocalPlayer.Character.Animate.Disabled = false
+            tpwalking = false
+
+
+
+        end
+
+
+
+
+
+    end)
+
+    local tis
+
+    up.MouseButton1Down:connect(function()
+        tis = up.MouseEnter:connect(function()
+            while tis do
+                wait()
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,1,0)
+            end
+        end)
+    end)
+
+    up.MouseLeave:connect(function()
+        if tis then
+            tis:Disconnect()
+            tis = nil
+        end
+    end)
+
+    local dis
+
+    down.MouseButton1Down:connect(function()
+        dis = down.MouseEnter:connect(function()
+            while dis do
+                wait()
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,-1,0)
+            end
+        end)
+    end)
+
+    down.MouseLeave:connect(function()
+        if dis then
+            dis:Disconnect()
+            dis = nil
+        end
+    end)
+
+
+    game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function(char)
+        wait(0.7)
+        game.Players.LocalPlayer.Character.Humanoid.PlatformStand = false
+        game.Players.LocalPlayer.Character.Animate.Disabled = false
+
+    end)
+
+
+    plus.MouseButton1Down:connect(function()
+        speeds = speeds + 1
+        speed.Text = speeds
+        if nowe == true then
+
+
+            tpwalking = false
+            for i = 1, speeds do
+                spawn(function()
+
+                    local hb = game:GetService("RunService").Heartbeat	
+
+
+                    tpwalking = true
+                    local chr = game.Players.LocalPlayer.Character
+                    local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+                    while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+                        if hum.MoveDirection.Magnitude > 0 then
+                            chr:TranslateBy(hum.MoveDirection)
+                        end
+                    end
+
+                end)
+            end
+        end
+    end)
+    mine.MouseButton1Down:connect(function()
+        if speeds == 1 then
+            speed.Text = 'cannot be less than 1'
+            wait(1)
+            speed.Text = speeds
+        else
+            speeds = speeds - 1
+            speed.Text = speeds
+            if nowe == true then
+                tpwalking = false
+                for i = 1, speeds do
+                    spawn(function()
+
+                        local hb = game:GetService("RunService").Heartbeat	
+
+
+                        tpwalking = true
+                        local chr = game.Players.LocalPlayer.Character
+                        local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+                        while tpwalking and hb:Wait() and chr and hum and hum.Parent do
+                            if hum.MoveDirection.Magnitude > 0 then
+                                chr:TranslateBy(hum.MoveDirection)
+                            end
+                        end
+
+                    end)
+                end
+            end
+        end
+    end)
+
+    closebutton.MouseButton1Click:Connect(function()
+        main:Destroy()
+    end)
+
+    mini.MouseButton1Click:Connect(function()
+        up.Visible = false
+        down.Visible = false
+        onof.Visible = false
+        plus.Visible = false
+        speed.Visible = false
+        mine.Visible = false
+        mini.Visible = false
+        mini2.Visible = true
+        main.Frame.BackgroundTransparency = 1
+        closebutton.Position =  UDim2.new(0, 0, -1, 57)
+    end)
+
+    mini2.MouseButton1Click:Connect(function()
+        up.Visible = true
+        down.Visible = true
+        onof.Visible = true
+        plus.Visible = true
+        speed.Visible = true
+        mine.Visible = true
+        mini.Visible = true
+        mini2.Visible = false
+        main.Frame.BackgroundTransparency = 0 
+        closebutton.Position =  UDim2.new(0, 0, -1, 27)
+    end)
+end)
+
 -- Секция
 local Tab = Window:NewTab("MM2")
 
 -- Подсекция
-local Section = Tab:NewSection("MitqyHub - T.me/mitqydev | MM2")
+local Section = Tab:NewSection("ぽ MitqyHub - T.me/mitqydev | MM2 ぽ")
 
 -- Заголовок
-Section:NewLabel("  --- Visual ---  ")
+Section:NewLabel("も Visual ど")
 
 -- Переключатель
 Section:NewToggle("Chams", "Toggle - Chams", function(state)
@@ -118,4 +866,246 @@ Section:NewToggle("Chams", "Toggle - Chams", function(state)
     else
         print("Chams Off!")
     end
+end)
+
+-- Подсекция
+local Section = Tab:NewSection("む Farm も")
+
+Section:NewButton("Farm Candy", "But easy farm script:D", function()
+    print("By mitqydev")
+    local TweenService = game:GetService("TweenService")
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local userInterface = player:WaitForChild("PlayerGui")
+
+    local maps = {
+        "Factory",
+        "BioLab",
+        "House2",
+        "Hospital3",
+        "Workplace",
+        "MilBase",
+        "Bank2",
+        "Hotel2",
+        "Mansion2",
+        "Office3",
+        "PoliceStation",
+        "ResearchFacility",
+        "Hotel",
+        "VampireCastle"
+    }
+
+    print("Debug: Loaded player, character, and maps.")
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = userInterface
+    screenGui.Name = "AutoFarmGui"
+
+    local sliderFrame = Instance.new("Frame", screenGui)
+    sliderFrame.Size = UDim2.new(0, 200, 0, 50)
+    sliderFrame.Position = UDim2.new(0.5, -100, 0, 10)
+
+    local slider = Instance.new("TextButton", sliderFrame)
+    slider.Size = UDim2.new(1, 0, 1, 0)
+    slider.Text = "Speed: 2"
+
+    local speedValue = 2
+    local autoFarmEnabled = false
+    local noclipEnabled = false
+    local mapFirstCoinCollected = {}
+
+    local configFolder = workspace:FindFirstChild("AutoFarmConfig")
+    if not configFolder then
+        configFolder = Instance.new("Folder")
+        configFolder.Name = "AutoFarmConfig"
+        configFolder.Parent = workspace
+    end
+
+    local speedConfig = Instance.new("IntValue", configFolder)
+    speedConfig.Name = "SpeedValue"
+    speedConfig.Value = speedValue
+
+    local autoFarmConfig = Instance.new("BoolValue", configFolder)
+    autoFarmConfig.Name = "AutoFarmEnabled"
+    autoFarmConfig.Value = autoFarmEnabled
+
+    slider.MouseButton1Click:Connect(function()
+        speedValue = speedValue + 1
+        if speedValue > 10 then
+            speedValue = 1
+        end
+        slider.Text = "Speed: " .. tostring(speedValue)
+        speedConfig.Value = speedValue
+        print("Debug: Speed adjusted to: " .. tostring(speedValue))
+    end)
+
+    local buttonFrame = Instance.new("Frame", screenGui)
+    buttonFrame.Size = UDim2.new(0, 200, 0, 50)
+    buttonFrame.Position = UDim2.new(0.5, -100, 0, 70)
+
+    local startStopButton = Instance.new("TextButton", buttonFrame)
+    startStopButton.Size = UDim2.new(1, 0, 1, 0)
+    startStopButton.Text = "Start AutoFarm"
+
+    startStopButton.MouseButton1Click:Connect(function()
+        autoFarmEnabled = not autoFarmEnabled
+        autoFarmConfig.Value = autoFarmEnabled
+        if autoFarmEnabled then
+            startStopButton.Text = "Stop AutoFarm"
+            noclipEnabled = true
+            print("Debug: AutoFarm started.")
+            startAutoFarm()
+        else
+            startStopButton.Text = "Start AutoFarm"
+            noclipEnabled = false
+            print("Debug: AutoFarm stopped.")
+        end
+    end)
+
+    local function noclip()
+        while noclipEnabled do
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+            wait(0.1)
+        end
+    end
+
+    coroutine.wrap(noclip)()
+
+    local function teleportToCoin(coin)
+        print("Debug: Teleporting to coin: " .. coin:GetFullName())
+        humanoidRootPart.CFrame = coin.CFrame
+
+        if coin:FindFirstChild("TouchInterest") then
+            print("Debug: Firing touch interest for coin: " .. coin:GetFullName())
+            firetouchinterest(humanoidRootPart, coin, 0)
+            firetouchinterest(humanoidRootPart, coin, 1)
+        end
+
+        wait(0.1)
+
+        humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+    end
+
+    local function tweenToCoin(coin)
+        print("Debug: Tweening to coin: " .. coin:GetFullName())
+        local distance = (humanoidRootPart.Position - coin.Position).Magnitude
+
+        local walkSpeed = 16
+        local adjustedSpeed = walkSpeed * 1.2
+        local tweenSpeed = distance / adjustedSpeed
+
+        tweenSpeed = math.max(tweenSpeed, 0.5)
+
+        local tweenInfo = TweenInfo.new(
+            tweenSpeed,
+            Enum.EasingStyle.Cubic,
+            Enum.EasingDirection.InOut
+        )
+        local tweenGoal = {CFrame = coin.CFrame}
+        local tween = TweenService:Create(humanoidRootPart, tweenInfo, tweenGoal)
+        tween:Play()
+
+        if character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
+            tween.Completed:Wait()
+
+            if coin:FindFirstChild("TouchInterest") then
+                print("Debug: Firing touch interest for coin: " .. coin:GetFullName())
+                firetouchinterest(humanoidRootPart, coin, 0)
+                firetouchinterest(humanoidRootPart, coin, 1)
+            end
+
+            wait(0.1)
+
+            humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+        else
+            print("Debug: Player is no longer alive, stopping tween.")
+            tween:Cancel()
+        end
+    end
+
+    function startAutoFarm()
+        coroutine.wrap(function()
+            while autoFarmEnabled do
+                for _, mapName in ipairs(maps) do
+                    local map = workspace:FindFirstChild(mapName)
+                    if map then
+                        print("Debug: Found map: " .. mapName)
+                        local coinContainer = map:FindFirstChild("CoinContainer")
+                        if coinContainer then
+                            print("Debug: Found coin container in map: " .. mapName)
+                            local coins = {}
+                            for _, coin in ipairs(coinContainer:GetChildren()) do
+                                if not coin:IsDescendantOf(workspace) then
+                                    print("Debug: Skipping already collected coin: " .. coin:GetFullName())
+                                elseif not coin:FindFirstChild("CoinVisual") then
+                                    print("Debug: Skipping invalid coin: " .. coin:GetFullName())
+                                else
+                                    table.insert(coins, coin)
+                                end
+                            end
+                            table.sort(coins, function(a, b)
+                                if a:IsA("BasePart") and b:IsA("BasePart") then
+                                    return (humanoidRootPart.Position - a.Position).Magnitude < (humanoidRootPart.Position - b.Position).Magnitude
+                                end
+                                return false
+                            end)
+                            if #coins > 0 then
+                                local firstCoin = coins[1]
+                                if not mapFirstCoinCollected[mapName] then
+                                    if firstCoin:FindFirstChild("CoinVisual") then
+                                        teleportToCoin(firstCoin.CoinVisual)
+                                        mapFirstCoinCollected[mapName] = true
+                                    end
+                                else
+                                    teleportToCoin(firstCoin.CoinVisual)
+                                    for _, coin in ipairs(coins) do
+                                        if not autoFarmEnabled then
+                                            print("Debug: AutoFarm stopped, exiting loop.")
+                                            return
+                                        end
+                                        if coin:FindFirstChild("CoinVisual") then
+                                            tweenToCoin(coin.CoinVisual)
+                                        end
+                                    end
+                                end
+                            end
+                        else
+                            print("Debug: No coin container found in map: " .. mapName)
+                        end
+                    else
+                        print("Debug: Map not found: " .. mapName)
+                    end
+                end
+                wait(1)
+            end
+        end)()
+    end
+
+    player.CharacterAdded:Connect(function(newCharacter)
+        character = newCharacter
+        humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        print("Debug: Character respawned, GUI remains visible.")
+        if autoFarmEnabled then
+            print("Debug: Resuming AutoFarm after respawn.")
+            startAutoFarm()
+        end
+    end)
+
+    player.OnTeleport:Connect(function(teleportState)
+        if teleportState == Enum.TeleportState.Failed then
+            local rejoinButton = Instance.new("TextButton", screenGui)
+            rejoinButton.Size = UDim2.new(0, 200, 0, 50)
+            rejoinButton.Position = UDim2.new(0.5, -100, 0, 130)
+            rejoinButton.Text = "Rejoin Game"
+            rejoinButton.MouseButton1Click:Connect(function()
+                game:GetService("TeleportService"):Teleport(game.PlaceId, player)
+            end)
+        end
+    end)
 end)
