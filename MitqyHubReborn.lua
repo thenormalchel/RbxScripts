@@ -15,6 +15,14 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
+    Fluent:Notify({
+        Title = "MitqyHub Reborn",
+        Content = "Thanks to use my script!",
+        SubContent = "TG Dev Channel - T.me/mitqyhub", -- Optional
+        Duration = 5 -- Set to nil to make the notification not disappear
+    })
+
+
 -- Creating tabs
 local Tabs = {
     Home = Window:AddTab({ Title = "Home", Icon = "home" }),
@@ -50,5 +58,17 @@ local Tabs = {
                     }
                 }
             })
+        end
+    })
+
+        local Slider = Tabs.Main:AddSlider("Slider", {
+        Title = "Speedhack",
+        Description = "Change you'r speed!",
+        Default = 2,
+        Min = 0,
+        Max = 200,
+        Rounding = 1,
+        Callback = function(SpeedValueSigma)
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = SpeedValueSigma
         end
     })
