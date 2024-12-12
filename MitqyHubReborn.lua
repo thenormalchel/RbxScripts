@@ -64,11 +64,73 @@ local Tabs = {
         local Slider = Tabs.Main:AddSlider("Slider", {
         Title = "Speedhack",
         Description = "Change you'r speed!",
-        Default = 2,
+        Default = 15,
         Min = 0,
         Max = 200,
         Rounding = 1,
         Callback = function(SpeedValueSigma)
             game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = SpeedValueSigma
+        end
+    })
+
+        Tabs.Home:AddButton({
+        Title = "Developer's Telegram Channel",
+        Description = "Copy the link to the developer's telegram channel :3",
+        Callback = function()
+            Window:Dialog({
+                Title = "Copy TG Link",
+                Content = "Copy The Link?",
+                Buttons = {
+                    {
+                        Title = "Yes :D",
+                        Callback = function()
+                            setclipboard("https://t.me/mitqyhub")
+                        end
+                    },
+                    {
+                        Title = "No :()",
+                        Callback = function()
+                            print("Cancelled the dialog.")
+                        end
+                    }
+                }
+            })
+        end
+    })
+
+            Tabs.Main:AddButton({
+        Title = "Die",
+        Description = "Kill local player :3",
+        Callback = function()
+            Window:Dialog({
+                Title = "Die?",
+                Content = "Are you sure?",
+                Buttons = {
+                    {
+                        Title = "Yes",
+                        Callback = function()
+                            game.Players.LocalPlayer.Character.Humanoid.Health = 0
+                        end
+                    },
+                    {
+                        Title = "No)",
+                        Callback = function()
+                            print("Cancelled the dialog.")
+                        end
+                    }
+                }
+            })
+        end
+    })
+
+        local Slider = Tabs.Misc:AddSlider("Slider", {
+        Title = "Custom FOV",
+        Description = "Change you'r FOV, lol.",
+        Default = 60,
+        Min = 0,
+        Max = 500,
+        Rounding = 1,
+        Callback = function(FovValueBruh)
+            workspace.Camera.FieldOfView = FovValueBruh
         end
     })
