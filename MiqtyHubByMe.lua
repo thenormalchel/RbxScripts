@@ -33,6 +33,11 @@ local colors = {
 -- Создать окно UI
 local Window = Library.CreateLib("MitqyHub - T.me/mitqydev", "RJTheme3")
 
+while not game:IsLoaded() or not game:GetService("CoreGui") or not game:GetService("Players").LocalPlayer or not game:GetService("Players").LocalPlayer.PlayerGui do wait() end
+
+local mouse = game.Players.LocalPlayer:GetMouse()
+mouse.Icon = "http://www.roblox.com/asset/?id=417446600"
+
 -- Секция
 local Tab = Window:NewTab("Visual")
 
@@ -368,6 +373,11 @@ local Section = Tab:NewSection("MitqyHub - T.me/mitqydev | Player")
 -- Слайдер
 Section:NewSlider("SpeedHack", "Change you'r speed", 500, 0, function(s) -- 500 (Макс. значение) | 0 (Мин. значение)
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+end)
+
+-- Текст Бокс
+Section:NewTextBox("FOV Changer", "Edit your FOV!:3", function(fovnemb)
+    workspace.Camera.FieldOfView = fovnemb
 end)
 
 -- Кнопка
