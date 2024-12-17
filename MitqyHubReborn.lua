@@ -4,6 +4,7 @@ local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
+local StarterPlayer = game:GetService("StarterPlayer")
 warn("MitqyHub Reborn - T.me/mitqydev")
 local Window = Fluent:CreateWindow({
     Title = "MitqyHub Reborn",
@@ -28,6 +29,7 @@ local Tabs = {
     Home = Window:AddTab({ Title = "Home", Icon = "home" }),
     Main = Window:AddTab({ Title = "Main", Icon = "code" }),
     Combat = Window:AddTab({ Title = "Combat", Icon = "diamond" }),
+    Visuals = Window:AddTab({ Title = "Visuals", Icon = "code" }),
     Teleports = Window:AddTab({ Title = "Teleports", Icon = "compass" }),
     Misc = Window:AddTab({ Title = "Misc", Icon = "file-text" }),
     Fun = Window:AddTab({ Title = "Fun", Icon = "coffee" }),
@@ -98,7 +100,7 @@ local Tabs = {
         end
     })
 
-            Tabs.Main:AddButton({
+        Tabs.Main:AddButton({
         Title = "Die",
         Description = "Kill local player :3",
         Callback = function()
@@ -132,5 +134,37 @@ local Tabs = {
         Rounding = 1,
         Callback = function(FovValueBruh)
             workspace.Camera.FieldOfView = FovValueBruh
+        end
+    })
+
+    local Toggle = Tabs.Visuals:AddToggle("ESP", {Title = "Esp", Default = false })
+
+    Toggle:OnChanged(function()
+        print("Toggle Esp:")
+    end)
+
+
+        Tabs.Fun:AddButton({
+        Title = "Bang😅",
+        Description = "You are such a naughty boy)))",
+        Callback = function()
+            Window:Dialog({
+                Title = "YOU ARE SURE?",
+                Content = "Do you want to masturbate?",
+                Buttons = {
+                    {
+                        Title = "Yes :)",
+                        Callback = function()
+                            setclipboard("https://pastebin.com/EuHBvQmF")
+                        end
+                    },
+                    {
+                        Title = "No.",
+                        Callback = function()
+                            print("Cancelled the dialog.")
+                        end
+                    }
+                }
+            })
         end
     })
