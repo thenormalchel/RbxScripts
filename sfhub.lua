@@ -1241,6 +1241,10 @@ local Tab = Window:NewTab("Universal FE")
 -- Подсекция
 local Section = Tab:NewSection("SF Hub | Universal FE")
 
+Section:NewButton("J3RK 0FF - R15", "Ahh..", function()
+    loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()
+end)
+
 -- Кнопка
 Section:NewButton("Telekines", ":D Instruction - R - Roates Block, T - Tilts Block, Y - Throws Block, Q & E - bring closer and further", function()
         -- Q & E - bring closer and further
